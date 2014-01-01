@@ -1,8 +1,8 @@
 const { bonusPointsSql } = require('./streak');
 
 // Puntos y retos respondidos de un usuario, calculados desde sus respuestas.
-// Las respuestas de retos con da_puntos = FALSE (retos personalizados de práctica) no cuentan.
-// `userColumn` es una columna o parámetro fijo del SQL que lo usa, nunca entrada del usuario.
+
+
 function scoredAnswersSql(userColumn, select) {
   return `(SELECT ${select}
              FROM respuestas_estudiante re

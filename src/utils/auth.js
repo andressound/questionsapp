@@ -4,7 +4,7 @@ const { promisify } = require('node:util');
 const scrypt = promisify(crypto.scrypt);
 
 // scrypt nativo de Node: corre en el threadpool de libuv y no bloquea el event loop,
-// a diferencia de bcryptjs (JS puro). Formato: scrypt$N$r$p$salt$hash (base64).
+// Formato: scrypt$N$r$p$salt$hash (base64).
 const SCRYPT_PARAMS = { N: 16384, r: 8, p: 1 };
 const KEY_LENGTH = 64;
 
@@ -56,7 +56,7 @@ function publicUser(user, streak = {}) {
     retos_completados: Number(user.retos_completados || 0),
     racha_actual: Number(streak.racha_actual || 0),
     racha_maxima: Number(streak.racha_maxima || 0),
-    // Enum de PostgreSQL en minúsculas: 'estudiante', 'profesor' o 'admin'.
+
     rol: String(user.role || 'ESTUDIANTE').toLowerCase(),
   };
 }
@@ -73,8 +73,8 @@ function duplicateUserMessage(error) {
 }
 
 // Código secreto que da el rol de profesor al registrarse (TEACHER_SIGNUP_CODE).
-// Sin código configurado nadie se registra como profesor. Se comparan los SHA-256
-// para que timingSafeEqual reciba la misma longitud y no se filtre nada por tiempos.
+
+
 function validTeacherCode(code, expected) {
   if (typeof code !== 'string' || typeof expected !== 'string' || expected === '') {
     return false;

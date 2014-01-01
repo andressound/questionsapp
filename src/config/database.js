@@ -12,7 +12,7 @@ const pool = new Pool({
   password: database.password,
   database: database.name,
   ssl: database.ssl ? { rejectUnauthorized: false } : undefined,
-  // Pool pequeño: los planes cloud limitados admiten pocas conexiones simultáneas.
+  // Pool pequeño
   max: database.poolMax,
   idleTimeoutMillis: 10_000,
   connectionTimeoutMillis: 5_000,

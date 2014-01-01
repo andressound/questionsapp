@@ -1,15 +1,15 @@
-// La racha son los días seguidos con el reto diario completado. No se guarda:
-// se calcula desde `intentos`, igual que los puntos.
+// La racha son los días seguidos con el reto diario completado.
+
 const MAX_STREAK_BONUS = 10;
 
-// Puntos extra al completar el reto diario: uno por día de racha, con tope.
+
 function streakBonus(days) {
   return Math.min(days, MAX_STREAK_BONUS);
 }
 
 // Racha actual y máxima del usuario. `db` puede ser el pool o el cliente de una transacción.
-// Los días seguidos comparten `fecha_dia - n.º de fila`, así cada grupo es una racha.
-// La actual sigue viva si su último día es hoy o ayer (hoy aún puede completarse).
+
+
 async function getStreak(db, userId) {
   const { rows } = await db.query(
     `WITH dias AS (
@@ -36,7 +36,7 @@ async function getStreak(db, userId) {
 }
 
 // Bonus de racha de todos los intentos del usuario, para sumarlo a sus puntos.
-// `userColumn` es una columna fija del SQL que lo usa, nunca entrada del usuario.
+
 function bonusPointsSql(userColumn) {
   return `COALESCE((SELECT SUM(bi.puntos_bonus) FROM intentos bi WHERE bi.id_estudiante = ${userColumn}), 0)`;
 }
