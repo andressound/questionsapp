@@ -1,6 +1,6 @@
 # QuestionsApp — Backend
 
-API REST de **QuestionsApp**, una app móvil (Flutter) para aprender respondiendo preguntas de opción múltiple con estilo de videojuego retro. Los usuarios se registran, juegan retos con tiempo límite, suman puntos y compiten en una clasificación.
+API REST de **QuestionsApp**, una app móvil (Flutter) para aprender respondiendo preguntas de opción múltiple. Los usuarios se registran, juegan retos con tiempo límite, suman puntos y compiten en una clasificación.
 
 Construida con **Node.js 24**, **Express 5** y **PostgreSQL 17**.
 
