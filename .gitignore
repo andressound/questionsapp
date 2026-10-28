@@ -1,0 +1,29 @@
+# Configuración local: contiene credenciales. Se sube solo .env.example.
+.env
+.env.*
+!.env.example
+
+# Dependencias: se instalan con `npm install` a partir de package-lock.json.
+node_modules/
+
+# Logs y salidas de pruebas
+npm-debug.log*
+*.log
+coverage/
+.nyc_output/
+
+# SQL de la antigua base MySQL; solo era referencia local tras migrar a PostgreSQL.
+database/mysql-legacy/
+database/
+
+# Copias de seguridad y volcados locales de la base
+*.dump
+*.backup
+backups/
+
+# Editor y sistema operativo
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

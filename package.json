@@ -1,0 +1,25 @@
+{
+  "name": "questionsapp-backend",
+  "version": "1.0.0",
+  "description": "API REST de QuestionsApp: retos diarios y semanales de preguntas, ranking y perfil (Express + PostgreSQL).",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "dev": "node --env-file-if-exists=.env --watch src/server.js",
+    "test": "node --test",
+    "crear-profesor": "node --env-file-if-exists=.env scripts/crear-profesor.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "pg": "^8.23.1"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
