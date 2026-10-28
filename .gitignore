@@ -15,6 +15,7 @@ coverage/
 # SQL de la antigua base MySQL; solo era referencia local tras migrar a PostgreSQL.
 database/mysql-legacy/
 database/
+docker-compose.yml
 
 # Copias de seguridad y volcados locales de la base
 *.dump
@@ -27,3 +28,4 @@ backups/
 *.swp
 .DS_Store
 Thumbs.db
+docker-compose.yml
