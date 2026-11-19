@@ -20,6 +20,7 @@ API REST de **QuestionsApp**, app móvil (Flutter) de retos de preguntas de opci
 | PATCH | `/api/usuarios/:id` 🔒 | Cambia `username`/`email` con la `password` actual |
 | GET | `/api/usuarios/ranking?limit=` 🔒 | Clasificación de estudiantes |
 | GET | `/api/usuarios/ranking/me` 🔒 | Puesto del usuario de la sesión |
+| GET | `/api/profesor/clasificacion?pagina=N` 🔒👩‍🏫 | Clasificación de estudiantes de 10 en 10, con `total` y `total_paginas` |
 | GET/POST | `/api/profesor/preguntas` 🔒👩‍🏫 | Banco de preguntas (de 5 en 5) / crear pregunta |
 | GET/POST | `/api/profesor/retos` 🔒👩‍🏫 | Retos personalizados / crear reto con código |
 | GET | `/api/profesor/retos/:id/estadisticas` 🔒👩‍🏫 | Respuestas por opción de cada pregunta, con los nombres de quién eligió cada una |
