@@ -2,11 +2,10 @@ const HttpError = require('./http-error');
 const { answeredSql, pointsSql } = require('./progress');
 
 // Guarda la respuesta de un usuario a una pregunta de un reto y actualiza su intento.
-// `day` es el fecha_dia del intento ('YYYY-MM-DD'): el día, el lunes de la semana o el día
-// en que se creó un reto personalizado. Lanza 400 INVALID_OPTION y 409 si ya respondió.
+
 async function saveAnswer(client, { userId, challengeId, day, questionId, optionId, elapsedSeconds, points, total, alreadyAnswered }) {
-  // Upsert sin cambios reales para obtener el id del intento en una sola consulta
-  // y bloquear la fila igual que un SELECT ... FOR UPDATE.
+
+
   const { rows: attemptRows } = await client.query(
     `INSERT INTO intentos (id_estudiante, id_reto, fecha_dia)
      VALUES ($1, $2, $3::date)

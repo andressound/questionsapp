@@ -4,7 +4,7 @@ const { promisify } = require('node:util');
 const scrypt = promisify(crypto.scrypt);
 
 // scrypt nativo de Node: corre en el threadpool de libuv y no bloquea el event loop,
-// a diferencia de bcryptjs (JS puro). Formato: scrypt$N$r$p$salt$hash (base64).
+// Formato: scrypt$N$r$p$salt$hash (base64).
 const SCRYPT_PARAMS = { N: 16384, r: 8, p: 1 };
 const KEY_LENGTH = 64;
 
@@ -56,7 +56,7 @@ function publicUser(user, streak = {}) {
     retos_completados: Number(user.retos_completados || 0),
     racha_actual: Number(streak.racha_actual || 0),
     racha_maxima: Number(streak.racha_maxima || 0),
-    // Enum de PostgreSQL en minúsculas: 'estudiante', 'profesor' o 'admin'.
+
     rol: String(user.role || 'ESTUDIANTE').toLowerCase(),
   };
 }
@@ -72,6 +72,17 @@ function duplicateUserMessage(error) {
     : 'El nombre de usuario ya está en uso';
 }
 
+// Código secreto que da el rol de profesor al registrarse (TEACHER_SIGNUP_CODE).
+
+
+function validTeacherCode(code, expected) {
+  if (typeof code !== 'string' || typeof expected !== 'string' || expected === '') {
+    return false;
+  }
+  const digest = (value) => crypto.createHash('sha256').update(value).digest();
+  return crypto.timingSafeEqual(digest(code), digest(expected));
+}
+
 module.exports = {
   duplicateUserMessage,
   hashPassword,
@@ -80,5 +91,6 @@ module.exports = {
   publicUser,
   validCredentials,
   validEmail,
+  validTeacherCode,
   verifyPassword,
 };

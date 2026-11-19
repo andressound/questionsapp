@@ -5,6 +5,7 @@ const { pointsSql } = require('../utils/progress');
 
 const UNIQUE_VIOLATION = '23505';
 const MAX_FIELD_LENGTH = 100;
+const RANKING_PAGE_SIZE = 10;
 
 // Todos los estudiantes (los profesores no compiten) con sus puntos y su puesto: más puntos primero y, a igualdad, por nombre.
 const RANKED_USERS = `
@@ -33,6 +34,27 @@ async function ranking(request, response) {
   const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 50) : 5;
   const { rows } = await pool.query(`${RANKED_USERS} ORDER BY posicion LIMIT $1`, [limit]);
   return response.json(rows.map(rankingEntry));
+}
+
+// Clasificación completa de 10 en 10 para el profesor; `pagina` empieza en 1.
+async function rankingPage(request, response) {
+  const requestedPage = Number.parseInt(request.query.pagina, 10);
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+  const [{ rows }, { rows: countRows }] = await Promise.all([
+    pool.query(
+      `${RANKED_USERS} ORDER BY posicion LIMIT $1 OFFSET $2`,
+      [RANKING_PAGE_SIZE, (page - 1) * RANKING_PAGE_SIZE],
+    ),
+    pool.query("SELECT COUNT(*) AS total FROM usuarios WHERE role = 'ESTUDIANTE'"),
+  ]);
+  const total = Number(countRows[0].total);
+  return response.json({
+    clasificacion: rows.map(rankingEntry),
+    pagina: page,
+    total,
+    total_paginas: Math.max(1, Math.ceil(total / RANKING_PAGE_SIZE)),
+  });
 }
 
 // Puesto del usuario de la sesión, aunque quede fuera de la lista que muestra la app.
@@ -96,4 +118,4 @@ async function updateProfile(request, response) {
   }
 }
 
-module.exports = { myRanking, ranking, updateProfile };
+module.exports = { myRanking, ranking, rankingPage, updateProfile };
