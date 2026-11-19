@@ -1,4 +1,5 @@
 const { pool } = require('../config/database');
+const { teacherSignupCode } = require('../config/env');
 const HttpError = require('../utils/http-error');
 const {
   duplicateUserMessage,
@@ -8,6 +9,7 @@ const {
   publicUser,
   validCredentials,
   validEmail,
+  validTeacherCode,
   verifyPassword,
 } = require('../utils/auth');
 const { createSession } = require('../utils/session');
@@ -17,7 +19,7 @@ const { getStreak } = require('../utils/streak');
 const UNIQUE_VIOLATION = '23505';
 
 async function register(request, response) {
-  const { username, email, password } = request.body || {};
+  const { username, email, password, codigoProfesor } = request.body || {};
   const normalizedEmail = normalizeEmail(email);
   const normalizedUsername = normalizeEmail(username) || normalizedEmail;
 
@@ -25,12 +27,18 @@ async function register(request, response) {
     || !validCredentials(normalizedUsername, password)) {
     throw new HttpError(400, 'VALIDATION_ERROR', 'Correo y contraseña inválidos');
   }
+  // El rol no se elige: solo quien conoce el código del servidor se registra como profesor.
+  const asTeacher = codigoProfesor !== undefined && codigoProfesor !== null && codigoProfesor !== '';
+  if (asTeacher && !validTeacherCode(codigoProfesor, teacherSignupCode)) {
+    throw new HttpError(403, 'INVALID_TEACHER_CODE', 'Código de profesor inválido');
+  }
+  const role = asTeacher ? 'PROFESOR' : 'ESTUDIANTE';
 
   try {
     const passwordHash = await hashPassword(password);
     const { rows } = await pool.query(
-      'INSERT INTO usuarios (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id_usuario',
-      [normalizedUsername, normalizedEmail, passwordHash],
+      'INSERT INTO usuarios (username, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id_usuario',
+      [normalizedUsername, normalizedEmail, passwordHash, role],
     );
     const token = await createSession(pool, rows[0].id_usuario);
     return response.status(201).json({
@@ -41,7 +49,7 @@ async function register(request, response) {
       retos_completados: 0,
       racha_actual: 0,
       racha_maxima: 0,
-      rol: 'estudiante',
+      rol: role.toLowerCase(),
       token,
     });
   } catch (error) {

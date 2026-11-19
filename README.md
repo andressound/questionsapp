@@ -10,7 +10,7 @@ API REST de **QuestionsApp**, app móvil (Flutter) de retos de preguntas de opci
 
 | Método | Ruta | Descripción |
 | --- | --- | --- |
-| POST | `/api/auth/register` | Crea un estudiante y devuelve `token` (`409` si el usuario o correo existen) |
+| POST | `/api/auth/register` | Crea un estudiante (o un profesor con `codigoProfesor` = `TEACHER_SIGNUP_CODE`; si no coincide, `403 INVALID_TEACHER_CODE`) y devuelve `token` (`409` si el usuario o correo existen) |
 | POST | `/api/auth/login` | Usuario (o correo) y contraseña → usuario + `token` |
 | GET | `/api/auth/me` 🔒 | Usuario de la sesión |
 | POST | `/api/auth/logout` 🔒 | Cierra la sesión (`204`) |
@@ -22,7 +22,7 @@ API REST de **QuestionsApp**, app móvil (Flutter) de retos de preguntas de opci
 | GET | `/api/usuarios/ranking/me` 🔒 | Puesto del usuario de la sesión |
 | GET/POST | `/api/profesor/preguntas` 🔒👩‍🏫 | Banco de preguntas (de 5 en 5) / crear pregunta |
 | GET/POST | `/api/profesor/retos` 🔒👩‍🏫 | Retos personalizados / crear reto con código |
-| GET | `/api/profesor/retos/:id/estadisticas` 🔒👩‍🏫 | Respuestas por opción de cada pregunta |
+| GET | `/api/profesor/retos/:id/estadisticas` 🔒👩‍🏫 | Respuestas por opción de cada pregunta, con los nombres de quién eligió cada una |
 | GET | `/api/retos-personalizados/:codigo` 🔒 | Entrar a un reto con su código (`410` si terminó) |
 | POST | `/api/retos-personalizados/:codigo/preguntas/:idPregunta/responder` 🔒 | Igual que la diaria |
 | GET | `/health` | Estado del servidor y de PostgreSQL (`503` si la base no responde) |
@@ -39,6 +39,7 @@ Las contraseñas se guardan con `scrypt` y los tokens como hash SHA-256; la sesi
 | `PORT` | `8080` | Puerto HTTP (Render lo define solo) |
 | `DB_SSL` | `false` | TLS cuando no se usa `DATABASE_URL` con `sslmode` |
 | `DB_POOL_MAX` | `5` | Conexiones máximas a la base |
+| `TEACHER_SIGNUP_CODE` | — (desactivado) | Código secreto que escriben los profesores al registrarse en la app. Usar un valor largo y aleatorio (`openssl rand -base64 18`) y cambiarlo si se filtra |
 
 `npm start` carga `.env` si existe (`node --env-file-if-exists`); en la nube las variables las define la plataforma. `.env` no se sube al repositorio: usa `.env.example` como plantilla.
 
@@ -46,7 +47,7 @@ Las contraseñas se guardan con `scrypt` y los tokens como hash SHA-256; la sesi
 
 1. **Base de datos (Neon):** cargar el esquema y los datos iniciales en el SQL Editor, y usar la cadena de conexión **directa** (sin `-pooler`) terminada en `?sslmode=verify-full`.
 2. **Backend (Render):** Web Service con runtime **Docker** a partir de este repositorio. El `Dockerfile` usa `node:24-alpine`, instala solo dependencias de producción y ejecuta `node src/server.js` con el usuario `node`.
-3. Variables en Render: `DATABASE_URL` y `TZ` (por ejemplo `America/Bogota`).
+3. Variables en Render: `DATABASE_URL`, `TZ` (por ejemplo `America/Bogota`) y, para permitir el registro de profesores, `TEACHER_SIGNUP_CODE`.
 4. Comprobar: `https://<servicio>.onrender.com/health` → `{"status":"ok","database":"ok"}`.
 
 En el plan gratuito, Render apaga el servicio tras 15 min sin tráfico y la primera petición después tarda cerca de un minuto.
@@ -60,7 +61,7 @@ npm run dev            # recarga al guardar
 npm test               # tests con node:test, no necesitan base de datos
 ```
 
-Crear un profesor (el registro de la app solo crea estudiantes) o cambiar su contraseña:
+Crear un profesor sin la app (en la app hace falta el código `TEACHER_SIGNUP_CODE`) o cambiar su contraseña:
 
 ```bash
 npm run crear-profesor -- <usuario> <correo> <contraseña>

@@ -8,6 +8,8 @@ function toNumber(value, fallback) {
 
 module.exports = {
   port: toNumber(process.env.PORT, 8080),
+  // Código que deben escribir los profesores al registrarse; vacío desactiva ese registro.
+  teacherSignupCode: process.env.TEACHER_SIGNUP_CODE || '',
   database: {
     // DATABASE_URL (habitual en proveedores cloud) tiene prioridad sobre DB_*.
     connectionString: process.env.DATABASE_URL || undefined,

@@ -72,6 +72,17 @@ function duplicateUserMessage(error) {
     : 'El nombre de usuario ya está en uso';
 }
 
+// Código secreto que da el rol de profesor al registrarse (TEACHER_SIGNUP_CODE).
+// Sin código configurado nadie se registra como profesor. Se comparan los SHA-256
+// para que timingSafeEqual reciba la misma longitud y no se filtre nada por tiempos.
+function validTeacherCode(code, expected) {
+  if (typeof code !== 'string' || typeof expected !== 'string' || expected === '') {
+    return false;
+  }
+  const digest = (value) => crypto.createHash('sha256').update(value).digest();
+  return crypto.timingSafeEqual(digest(code), digest(expected));
+}
+
 module.exports = {
   duplicateUserMessage,
   hashPassword,
@@ -80,5 +91,6 @@ module.exports = {
   publicUser,
   validCredentials,
   validEmail,
+  validTeacherCode,
   verifyPassword,
 };

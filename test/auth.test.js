@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { duplicateUserMessage, normalizeEmail, validCredentials, validEmail } = require('../src/utils/auth');
+const { duplicateUserMessage, normalizeEmail, validCredentials, validEmail, validTeacherCode } = require('../src/utils/auth');
 
 test('normaliza correos para el registro', () => {
   assert.equal(normalizeEmail('  Persona@Example.COM '), 'persona@example.com');
@@ -54,4 +54,16 @@ test('el usuario público lleva su rol en minúsculas', () => {
   assert.equal(publicUser({ id_usuario: 1, username: 'ana', role: 'PROFESOR' }).rol, 'profesor');
   assert.equal(publicUser({ id_usuario: 2, username: 'leo', role: 'ESTUDIANTE' }).rol, 'estudiante');
   assert.equal(publicUser({ id_usuario: 3, username: 'sin-rol' }).rol, 'estudiante');
+});
+
+test('solo acepta el código de profesor configurado', () => {
+  assert.equal(validTeacherCode('Clave-Profes-2026', 'Clave-Profes-2026'), true);
+  assert.equal(validTeacherCode('clave-profes-2026', 'Clave-Profes-2026'), false);
+  assert.equal(validTeacherCode('corto', 'Clave-Profes-2026'), false);
+  assert.equal(validTeacherCode(123, 'Clave-Profes-2026'), false);
+});
+
+test('sin código configurado nadie se registra como profesor', () => {
+  assert.equal(validTeacherCode('', ''), false);
+  assert.equal(validTeacherCode('cualquiera', ''), false);
 });

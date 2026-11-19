@@ -134,7 +134,7 @@ async function createChallenge(request, response) {
   return response.status(201).json(challenge);
 }
 
-// Cuántos estudiantes eligieron cada opción de cada pregunta. Solo el creador (o un admin) lo ve.
+// Cuántos estudiantes (y quiénes) eligieron cada opción de cada pregunta. Solo el creador (o un admin) lo ve.
 async function challengeStats(request, response) {
   const challengeId = parseId(request.params.id);
   if (!challengeId) {
@@ -153,29 +153,33 @@ async function challengeStats(request, response) {
 
   const { rows } = await pool.query(
     `WITH conteo AS (
-       SELECT re.id_pregunta, re.id_opcion_seleccionada AS id_opcion, COUNT(*) AS total
+       SELECT re.id_pregunta, re.id_opcion_seleccionada AS id_opcion, COUNT(*) AS total,
+              jsonb_agg(u.username ORDER BY u.username) AS nombres
          FROM respuestas_estudiante re
          INNER JOIN intentos i ON i.id_intento = re.id_intento
+         INNER JOIN usuarios u ON u.id_usuario = i.id_estudiante
         WHERE i.id_reto = $1
         GROUP BY re.id_pregunta, re.id_opcion_seleccionada
      )
      SELECT p.id_pregunta AS id,
             rp.posicion,
             p.enunciado,
-            COALESCE((SELECT c.total FROM conteo c
-                       WHERE c.id_pregunta = p.id_pregunta AND c.id_opcion IS NULL), 0) AS sin_respuesta,
+            COALESCE(sr.total, 0) AS sin_respuesta,
+            COALESCE(sr.nombres, '[]'::jsonb) AS estudiantes_sin_respuesta,
             json_agg(json_build_object(
               'id', o.id_opcion,
               'texto', o.texto,
               'es_correcta', o.es_correcta,
-              'respuestas', COALESCE(oc.total, 0)
+              'respuestas', COALESCE(oc.total, 0),
+              'estudiantes', COALESCE(oc.nombres, '[]'::jsonb)
             ) ORDER BY o.id_opcion) AS opciones
        FROM reto_preguntas rp
        INNER JOIN preguntas p ON p.id_pregunta = rp.id_pregunta
        INNER JOIN opciones o ON o.id_pregunta = p.id_pregunta
        LEFT JOIN conteo oc ON oc.id_opcion = o.id_opcion
+       LEFT JOIN conteo sr ON sr.id_pregunta = p.id_pregunta AND sr.id_opcion IS NULL
       WHERE rp.id_reto = $1
-      GROUP BY p.id_pregunta, rp.posicion, p.enunciado
+      GROUP BY p.id_pregunta, rp.posicion, p.enunciado, sr.total, sr.nombres
       ORDER BY rp.posicion`,
     [challengeId],
   );
